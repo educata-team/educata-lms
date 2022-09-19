@@ -4,7 +4,7 @@ Educata is a learning management system project for Software Engineering 3rd gra
 
 ## Project setup
 
-#### Prerequisites: **Python 3.10.X, NodeJS 16.14**
+Prerequisites: **Python 3.10.X, NodeJS 16.14**
 
 1. Go to root folder and run `python -m venv backend/.py-venv` to create python virtual environment
 2. Select the venv in your IDE
@@ -13,7 +13,7 @@ Educata is a learning management system project for Software Engineering 3rd gra
 
 ## Running the project
 
-#### From root:
+**From root:**
 
 - frontend: `npm run start --prefix frontend`
 - backend: 
