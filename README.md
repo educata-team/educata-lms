@@ -54,3 +54,5 @@ Prerequisites: **Python 3.10.X, NodeJS 16.14**
 - `frontend-5: + form component`
 - `backend-12: * filter markup`
 - `shared-16: - require prop for nickname field`
+
+## Workflow
