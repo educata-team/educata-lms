@@ -8,7 +8,7 @@ Prerequisites: **Python 3.10.X, NodeJS 16.14**
 
 1. Go to root folder and run `python -m venv backend/.py-venv` to create python virtual environment
 2. Select the venv in your IDE
-3. Kill the IDE terminal and open it again to apply selected venv (check if `pip -V` gives you right path)
+3. Kill the IDE terminal and open it again to apply selected venv (check if `pip -V` gives you right path), otherwise activate the venv manually
 4. Switch to backend directory `cd backend` and install the packages: `pip install -r requirements.txt`
 5. Then switch to frontend directory `cd ../frontend` and install the packages: `npm i`
 
