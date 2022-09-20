@@ -12,7 +12,7 @@ Prerequisites: **Python 3.10.X, NodeJS 16.14**
 4. Switch to backend directory `cd backend` and install the packages: `pip install -r requirements.txt`
 5. Then switch to frontend directory `cd ../frontend` and install the packages: `npm i`
 6. `cd .docker` from root and create `db.env` file according to `.example`
-8. Run the database container: `docker compose up -d`
+7. Run the database container: `docker compose up -d`
 
 ## Running the project
 
