@@ -58,12 +58,3 @@ Prerequisites: **Python 3.10.X, NodeJS 16.14**
 ## Workflow
 
 ### Pull requests
-
-
-<!-- Some weird comment -->
-
-Some weird code
-
-
-
-
