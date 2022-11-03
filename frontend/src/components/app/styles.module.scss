@@ -1,18 +1,5 @@
-.app {
-  text-align: center;
-}
-
-.app-header {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  color: white;
-  font-size: calc(10px + 2vmin);
-  background-color: #282c34;
-}
-
-.app-link {
-  color: #61dafb;
+.main-content {
+  flex: 1;
+  max-height: 100%;
+  overflow: auto;
 }
