@@ -16,7 +16,7 @@ interface Props {
 
 export const Icon: FC<Props> = ({
   name,
-  color = '#000',
+  color = IconColor.BLACK,
   size = 20,
   className,
 }) => {
