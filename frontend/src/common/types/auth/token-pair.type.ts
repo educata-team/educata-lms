@@ -1,4 +1,4 @@
 export type TokenPair = {
-  accessToken: string;
-  refreshToken: string;
+  access: string;
+  refresh: string;
 };
