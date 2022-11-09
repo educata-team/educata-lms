@@ -26,6 +26,7 @@ class Course(models.Model):
 
 class Unit(models.Model):
     title = models.CharField(max_length=200, verbose_name='Назва')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -34,7 +35,6 @@ class Lecture(models.Model):
     title = models.CharField(max_length=200, verbose_name='Назва')
     body = models.TextField(verbose_name='Вміст курсу')
     video_url = models.URLField(blank=True, null=True, verbose_name='Посилання на відео')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
