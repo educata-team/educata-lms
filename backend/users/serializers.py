@@ -25,7 +25,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                                         bio=validated_data.get('bio'),
                                         last_name=validated_data.get('last_name'),
                                         first_name=validated_data.get('first_name'))
-        return {'username': user.username,
+        return {
+                'id': user.pk,
+                'username': user.username,
                 'email': user.email,
                 'first_name': user.first_name,
                 'last_name': user.last_name
