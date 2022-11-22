@@ -1,0 +1,40 @@
+.course-list{
+
+  width: 55vw;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+
+
+  .course-card{
+    width: 200px;
+    height: 200px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0 3px 8px;
+    margin: 10px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    .banner{
+      border-radius: 10px 10px 0 0 ;
+      width: 100%;
+      height: 100px;
+      background-color: black;
+    }
+    .course-name{
+      width: 100%;
+      font-size: 24px;
+      text-align: center;
+      overflow:hidden;
+
+    }
+    .course-author{
+      width: 100%;
+      position: relative;
+      margin: 0 0 10px 10px;
+      font-size: 14px;
+      color: gray;
+    }
+  }
+}

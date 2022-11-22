@@ -229,14 +229,14 @@ rules:
     - visibility
     - cursor
     - mix-blend-mode
-    - backdrop-filter
+    - backdrop-filter-bar
     - will-change
     - transform
     - transform-origin
     - transform-style
     - backface-visibility
     - opacity
-    - filter
+    - filter-bar
     - perspective
     - perspective-origin
     - transition
