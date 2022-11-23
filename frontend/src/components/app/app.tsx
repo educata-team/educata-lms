@@ -14,10 +14,6 @@ export const App: FC = () => {
   return (
     <>
       <ScrollToTop querySelectors={scrollToTopQuerySelectors} />
-      {/* Remove this later */}
-      <Icon name={IconName.HOME} size={20} color="green" />
-      <Icon name={IconName.BELL} size={50} color={IconColor.PRIMARY_BLUE} />
-
       <div className={styles['main-content']}>
         <Routes>
           <Route path={AppRoute.ROOT} element={<></> /* Insert homepage component here instead of <></> */} />
