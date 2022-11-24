@@ -2,13 +2,21 @@ import styles from './styles.module.scss';
 import React from 'react';
 import { FC } from '../../../common/types/react/fc.type';
 
-export const FilterBar: FC = () => {
+interface Props{
+  select: string;
+  setSelect(select: string):void;
+}
+
+export const FilterBar: FC<Props> = ({
+  select,
+  setSelect,
+                                     }) => {
   return (
     <div className={styles['filter']}>
       <ul>
-        <li>Home</li>
-        <li>In Progress</li>
-        <li>Completed</li>
+        <li className={ select === 'home'? styles['select'] : '' } onClick={():void => setSelect('home')}>Home</li>
+        <li className={ select === 'in-progress'? styles['select'] : '' } onClick={():void => setSelect('in-progress')}>In Progress</li>
+        <li className={ select === 'completed'? styles['select'] : '' } onClick={():void => setSelect('completed')}>Completed</li>
       </ul>
     </div>
   );
