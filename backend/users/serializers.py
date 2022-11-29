@@ -15,7 +15,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        exclude = ['created_at', 'updated_at', 'last_login', 'is_admin', 'is_active', 'role']
+        exclude = ['created_at', 'updated_at', 'last_login', 'is_admin', 'is_active']
 
     def create(self, validated_data):
         user = User.objects.create_user(username=validated_data.get('username'),
@@ -24,13 +24,15 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                                         avatar=validated_data.get('avatar'),
                                         bio=validated_data.get('bio'),
                                         last_name=validated_data.get('last_name'),
-                                        first_name=validated_data.get('first_name'))
+                                        first_name=validated_data.get('first_name'),
+                                        role=validated_data.get('role'))
         return {
                 'id': user.pk,
                 'username': user.username,
                 'email': user.email,
                 'first_name': user.first_name,
-                'last_name': user.last_name
+                'last_name': user.last_name,
+                'role': user.role
                 }
 
 
