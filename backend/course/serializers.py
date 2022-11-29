@@ -12,31 +12,6 @@ class UserSerializer(ModelSerializer):
 
 
 class CourseSerializer(ModelSerializer):
-    units = SerializerMethodField(method_name='get_units')
-    evaluators = SerializerMethodField(method_name='get_evaluators')
-    owner = SerializerMethodField()
-    managers = SerializerMethodField()
-    editors = SerializerMethodField()
-
-    def get_owner(self, obj):
-        return UserSerializer(obj.owner).data
-
-
-    def get_units(self, obj):
-        units = obj.unit_set.all()
-        return UnitSerializer(units, many=True).data
-
-    def get_evaluators(self, obj):
-        evaluators = obj.evaluators.all()
-        return UserSerializer(evaluators, many=True).data
-
-    def get_managers(self, obj):
-        managers = obj.managers.all()
-        return UserSerializer(managers, many=True).data
-
-    def get_editors(self, obj):
-        editors = obj.editors.all()
-        return UserSerializer(editors, many=True).data
 
     class Meta:
         model = Course
@@ -59,21 +34,28 @@ class CourseSerializer(ModelSerializer):
 
 
 class CategorySerializer(ModelSerializer):
-    course_set = SerializerMethodField()
-
-    def get_course_set(self, obj):
-        courses = obj.course_set.all()
-        return CourseSerializer(courses, many=True).data
 
     class Meta:
         model = Category
-        fields = ('course_set', 'title', 'created_at', 'updated_at')
+        fields = ('title', 'created_at', 'updated_at')
 
 
 class UnitSerializer(ModelSerializer):
     class Meta:
         model = Unit
         fields = '__all__'
+
+    def create(self, validated_data):
+        unit = Unit.objects.create(
+            title=validated_data.get('title'),
+            course=self.context.get('course')
+        )
+        return unit
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.save()
+        return instance
 
 
 class LectureSerializer(ModelSerializer):
@@ -83,16 +65,7 @@ class LectureSerializer(ModelSerializer):
 
 
 class AttendedCourseSerializer(ModelSerializer):
-    user = SerializerMethodField(required=False)
-    course = SerializerMethodField()
-
-    def get_course(self, obj):
-        return CourseSerializer(obj.course).data
-
-    def get_user(self, obj):
-        print(f"obj in gt user {obj}")
-        print(self.context)
-        return UserSerializer(obj.user).data
+    user = StringRelatedField(required=False)
 
     class Meta:
         model = AttendedCourse
@@ -112,7 +85,7 @@ class AttendedCourseSerializer(ModelSerializer):
 
 
 class ReviewSerializer(ModelSerializer):
-    user = SerializerMethodField(required=False)
+    user = StringRelatedField(required=False)
 
     class Meta:
         model = Review
@@ -142,3 +115,13 @@ class AssignmentSerializer(ModelSerializer):
     class Meta:
         model = Assignment
         fields = '__all__'
+
+    def create(self, validated_data):
+        assignment = Assignment.objects.create(
+            title=validated_data.get('title'),
+            unit=self.context.get('unit'),
+            description=validated_data.get('description'),
+            file_required=validated_data.get('file_required'),
+            form_required=validated_data.get('form_required')
+        )
+        return assignment

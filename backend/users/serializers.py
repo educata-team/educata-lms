@@ -46,16 +46,12 @@ class MyTokenObtainSerizalier(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        refresh = self.get_token(self.user)
-
-        # Add extra responses here
         data['user_id'] = self.user.pk
         return data
 
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
         token['role'] = user.role
         return token
 
@@ -65,6 +61,7 @@ class CustomTokenRefreshSerializer(TokenRefreshSerializer):
         data = super(CustomTokenRefreshSerializer, self).validate(attrs)
         decoded_payload = token_backend.decode(data['access'], verify=True)
         user_uid = decoded_payload['user_id']
+        print(user_uid)
         # add filter query
         data.update({'user_id': user_uid})
         return data

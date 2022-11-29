@@ -58,7 +58,6 @@ class Review(models.Model):
 
 class Assignment(models.Model):
     title = models.CharField(max_length=200, verbose_name='Назва')
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name='Курс')
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, verbose_name='Юніт')
     description = models.TextField(verbose_name='Опис')
     file_required = models.BooleanField(verbose_name='Завдання, яке вимагає файлову відопвідь', default=False)

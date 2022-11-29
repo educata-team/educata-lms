@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from rest_framework.permissions import SAFE_METHODS
+from rest_framework.exceptions import PermissionDenied
 
 from .models import *
 
@@ -43,6 +44,32 @@ class AttendedCoursePermission(permissions.BasePermission):
         return False
 
 
+class UnitPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            if request.user.is_anonymous:
+                raise PermissionDenied({'detail': 'You do not have permission'})
+
+            try:
+                course = Course.objects.get(pk=view.kwargs.get('course_pk'))
+                if request.user in course.editors.all() or request.user in course.managers.all() \
+                        or request.user == course.owner or request.user.role == 'moderator':
+                    return True
+                raise PermissionDenied({'detail': 'You do not have permission'})
+            except Course.DoesNotExist:
+                pass
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.user.is_anonymous:
+            raise PermissionDenied({'detail': 'You do not have permission'})
+        elif request.user in obj.course.editors.all() or request.user in obj.course.managers.all() \
+                or request.user == obj.course.owner or request.user.role == 'moderator':
+            return True
+        else:
+            raise PermissionDenied({'detail': 'You do not have permission'})
+
+
 class ReviewPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         return True
@@ -50,3 +77,11 @@ class ReviewPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user == obj.user or request.user.is_admin:
             return True
+
+
+class AssignmentPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        return obj.unit.course.owner == request.user

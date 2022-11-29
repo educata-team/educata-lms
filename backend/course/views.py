@@ -1,12 +1,7 @@
-import json
-
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from jwt import decode
-
-from backend import settings
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, DestroyAPIView
 
 from .permissions import *
 from .serializers import *
@@ -30,10 +25,6 @@ class CourseViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         response = super(CourseViewSet, self).retrieve(request, *args, **kwargs)
-        access_token = request.META.get('HTTP_AUTHORIZATION')
-        print(access_token[7::])
-        token = decode(access_token[7::], settings.SECRET_KEY, algorithms=['HS256'])
-        print(token)
         return response
 
 
@@ -46,9 +37,71 @@ class CategoryViewsSet(ModelViewSet):
         return super(CategoryViewsSet, self).update(request, *args, **kwargs)
 
 
-class UnitViewSet(ModelViewSet):
-    queryset = Unit.objects.all()
+class UnitListCreateAPIView(ListCreateAPIView, DestroyAPIView):
     serializer_class = UnitSerializer
+    lookup_field = 'unit_pk'
+    permission_classes = [UnitPermission]
+
+    def get_queryset(self):
+        return Unit.objects.select_related('course').filter(course=Course.objects.get(pk=self.kwargs.get('course_pk')))
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        try:
+            course = Course.objects.get(pk=self.kwargs.get('course_pk'))
+        except Course.DoesNotExist:
+            return Response(data={'detail': 'Couse does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(data=request.data, context={'course': course})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        try:
+            unit_to_delete = Unit.objects.get(pk=request.data.get('unit_pk'))
+            self.check_object_permissions(self.request, obj=unit_to_delete)
+            unit_to_delete.delete()
+            return Response(data={'detail': 'Successfully deleted'}, status=status.HTTP_200_OK)
+        except Unit.DoesNotExist:
+            return Response(data={'detail': 'Indicated unit does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class UnitRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
+    serializer_class = UnitSerializer
+    lookup_field = 'unit_pk'
+    permission_classes = [UnitPermission]
+
+    def get_object(self):
+        try:
+            unit = Unit.objects.select_related('course').get(pk=self.kwargs.get('unit_pk'),
+                                                             course=Course.objects.get(pk=self.kwargs.get('course_pk')))
+            return unit
+        except (Unit.DoesNotExist, Course.DoesNotExist):
+            return None
+
+    def retrieve(self, request, *args, **kwargs):
+        unit = self.get_object()
+        if not unit:
+            return Response(data={'detail': 'Unit or course does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(instance=unit)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        unit = self.get_object()
+        self.check_object_permissions(self.request, obj=unit)
+        if not unit:
+            return Response(data={'detail': 'Indicated unit does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.get_serializer(data=request.data, instance=unit)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class AttendedCourseViewSet(ModelViewSet):
@@ -74,10 +127,8 @@ class AttendedCourseViewSet(ModelViewSet):
             return Response({'detail': 'You do not subscribed on requested course'}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
-        print(request.data.get('id'))
         serializer = self.get_serializer(data=request.data, context={'user': request.user})
         if serializer.is_valid():
-            print(serializer.data)
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -132,6 +183,31 @@ class ReviewViewSet(ModelViewSet):
             return Response({'detail': 'Indicated course or review does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class AssignmentModelViewSet(ModelViewSet):
+class AssignmentListCreateAPIView(ListCreateAPIView):
     serializer_class = AssignmentSerializer
 
+    def get_queryset(self):
+        try:
+            return Assignment.objects.select_related('unit__course').filter(unit__course__pk=self.kwargs.get('course_pk'))
+        except (KeyError, AttributeError):
+            return None
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(instance=queryset, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        try:
+            unit = Unit.objects.select_related('course', 'course__owner').get(pk=request.data.get('unit'), course__isnull=False)
+        except Unit.DoesNotExist:
+            return Response(data='Indicated unit does not exist', status=status.HTTP_404_NOT_FOUND)
+
+        if request.user != unit.course.owner:
+            return Response({'detail': 'You do not have permission to create assignment for this course'}, status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(data=request.data, context={'unit': unit})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data={'detail': 'Errors occures'}, status=status.HTTP_400_BAD_REQUEST)
