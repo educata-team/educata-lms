@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, StringRelatedField, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, StringRelatedField, IntegerField, RelatedField
 from rest_framework.exceptions import ValidationError
 
 from course.models import *
@@ -111,6 +111,7 @@ class ReviewSerializer(ModelSerializer):
 
 
 class AssignmentSerializer(ModelSerializer):
+    unit = IntegerField(source='unit.id', required=False)
 
     class Meta:
         model = Assignment

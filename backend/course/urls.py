@@ -10,5 +10,6 @@ urlpatterns = [
     path('<int:course_pk>/unit/<int:unit_pk>/', UnitRetrieveUpdateDestroyAPIView.as_view(), name='unit-get-update-delete'),
     path('<int:course_pk>/reviews/', require_http_methods(['GET', 'POST'])(ReviewViewSet.as_view({'get': 'list', 'post': 'create'}))),
     path('<int:course_pk>/reviews/<int:review_pk>/', require_http_methods(['DELETE'])(ReviewViewSet.as_view({'delete': 'destroy'}))),
-    path('<int:course_pk>/<int:unit_pk>/assignments/', AssignmentListCreateAPIView.as_view()),
+    path('<int:unit_pk>/assignment/', AssignmentListCreateAPIView.as_view(), name='assignment-list-create'),
+    path('<int:unit_pk>/assignment/<int:assignment_pk>/', AssignmentRetrieveUpdateDestroyAPIView.as_view(), name='assignment-get-update-delete'),
 ]

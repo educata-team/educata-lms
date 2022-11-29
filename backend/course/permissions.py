@@ -81,7 +81,40 @@ class ReviewPermission(permissions.BasePermission):
 
 class AssignmentPermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            raise PermissionDenied({'detail': 'You do not have permission'})
+
+        if request.method == 'POST':
+            try:
+                unit = Unit.objects\
+                    .select_related('course', 'course__owner')\
+                    .prefetch_related('course__evaluators', 'course__managers', 'course__editors')\
+                    .get(pk=view.kwargs.get('unit_pk'))
+            except (Unit.DoesNotExist, KeyError, AttributeError):
+                return True
+            if request.user in unit.course.editors.all() or request.user in unit.course.managers.all() \
+                    or request.user == unit.course.owner or request.user.role == 'moderator':
+                return True
+            else:
+                raise PermissionDenied({'detail': 'You do not have permission'})
+        try:
+            unit = Unit.objects.select_related('course').prefetch_related('course__attendedcourse_set').get(pk=view.kwargs.get('unit_pk'))
+
+            # check if user from request has subscription on the unit`s course
+            if request.user not in [attended_course.user for attended_course in unit.course.attendedcourse_set.all()] \
+                    and request.user.role != 'moderator':
+                raise PermissionDenied({'detail': 'You do not have permission'})
+        except (AttributeError, KeyError, Unit.DoesNotExist):
+            pass
+
         return True
 
     def has_object_permission(self, request, view, obj):
-        return obj.unit.course.owner == request.user
+        print(request.user)
+        if request.user.is_anonymous:
+            raise PermissionDenied({'detail': 'You do not have permission'})
+        elif request.user in obj.unit.course.editors.all() or request.user in obj.unit.course.managers.all() \
+                or request.user == obj.unit.course.owner or request.user.role == 'moderator':
+            return True
+        else:
+            raise PermissionDenied({'detail': 'You do not have permission'})
