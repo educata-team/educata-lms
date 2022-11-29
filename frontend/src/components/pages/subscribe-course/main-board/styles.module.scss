@@ -1,0 +1,129 @@
+.main-board-wrapper {
+  background-color: rgb(2, 71, 148);
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+
+  .main-board {
+    color: white;
+    width: 1440px;
+    display: flex;
+    font-family: OpenSans-Bold, Arial, sans-serif;
+    justify-content: space-between;
+    padding: 40px 0;
+
+
+    .review {
+      display: flex;
+      flex-direction: column;
+
+      .category {
+        list-style-type: none;
+        padding: 0;
+        margin: 10px 0 0 0;
+        display: flex;
+
+        li {
+          font-size: 14px;
+          font-weight: bold;
+          margin-right: 10px;
+        }
+
+        li + li::before {
+          content: '>';
+          margin-right: 5px;
+        }
+      }
+
+      .info {
+        margin-top: 30px;
+
+
+        .name {
+          font-weight: 700;
+          font-size: 34px;
+          line-height: 46px;
+          overflow-wrap: break-word;
+        }
+
+        .rating-block {
+          display: flex;
+          font-size: 20px;
+          align-items: end;
+
+
+          .rating {
+            display: flex;
+            justify-content: end;
+            align-items: end;
+            margin-right: 10px;
+            font-weight: bold;
+            color: #fb8332;
+
+            :first-child {
+              margin-right: 10px;
+            }
+          }
+        }
+
+        .author {
+          margin-top: 40px;
+        }
+      }
+
+      .subscribe {
+        margin-top: 40px;
+
+        button {
+          align-items: center;
+          background-clip: padding-box;
+          background-color: #fa6400;
+          border: 1px solid transparent;
+          border-radius: .25rem;
+          box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+          box-sizing: border-box;
+          color: #fff;
+          cursor: pointer;
+          display: inline-flex;
+          font-size: 16px;
+          font-weight: 600;
+          justify-content: center;
+          line-height: 1.25;
+          margin: 0;
+          min-height: 3rem;
+          padding: calc(.875rem - 1px) calc(1.5rem - 1px);
+          position: relative;
+          text-decoration: none;
+          transition: all 250ms;
+          user-select: none;
+          -webkit-user-select: none;
+          touch-action: manipulation;
+          vertical-align: baseline;
+          width: auto;
+
+        }
+
+        button:hover,
+        button:focus {
+          background-color: #fb8332;
+          box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+        }
+
+        button:hover {
+          transform: translateY(-1px);
+        }
+
+        button:active {
+          background-color: #c85000;
+          box-shadow: rgba(0, 0, 0, .06) 0 2px 4px;
+          transform: translateY(0);
+        }
+
+        :last-child {
+          margin-top: 20px;
+        }
+      }
+
+    }
+  }
+}

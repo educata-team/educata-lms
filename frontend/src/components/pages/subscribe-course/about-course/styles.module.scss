@@ -1,0 +1,42 @@
+.about-course-wrapper {
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  font-family: OpenSans-Bold, Arial, sans-serif;
+
+  .about-course {
+    width: 1440px;
+
+    .description{
+
+      h2{
+        font-size: 28px;
+        line-height: 30px;
+      }
+      p{
+        font-size: 18px;
+        line-height: 21px;
+        font-family: OpenSans,Arial,sans-serif;
+      }
+    }
+
+    .objectives{
+
+      label{
+        font-size: 16px;
+        font-weight: bold;
+      }
+      ul{
+        list-style-type: none;
+
+        li{
+
+        }
+        li::before{
+          content: '\2714\0020';
+
+        }
+      }
+    }
+  }
+}
