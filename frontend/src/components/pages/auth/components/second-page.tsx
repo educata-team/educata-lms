@@ -7,13 +7,11 @@ import { Stack } from '@mui/system';
 interface Props {
   onPageSwitch(pageNumber: number): void;
   register: UseFormRegister<FormValues>;
-  onSubmit(): void;
 }
 
 export const SecondPage: FC<Props> = ({
   onPageSwitch,
   register,
-  onSubmit,
 }) => {
 
   return (
@@ -28,7 +26,7 @@ export const SecondPage: FC<Props> = ({
 
         <Stack >
           <Button variant="outlined" style={{ margin: '8px 0' }} onClick={(): void => onPageSwitch(1)}>Back</Button>
-          <Button variant="contained" style={{ margin: '8px 0' }} onClick={(): void => onSubmit()}>Sign up</Button>
+          <Button type="submit" variant="contained" style={{ margin: '8px 0' }} >Sign up</Button>
         </Stack>
       </Paper>
     </Grid>
