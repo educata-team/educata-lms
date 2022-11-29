@@ -9,7 +9,7 @@ export const MainBoard:FC = () => {
     <div className={styles['main-board-wrapper']}>
       <div className={styles['main-board']}>
         <Review/>
-        <Logo/>
+        <Logo url={'https://images-platform.99static.com//KlBLMX8dQrcq6hZGnxf5HSnG29I=/8x543:525x1060/fit-in/500x500/99designs-contests-attachments/123/123360/attachment_123360235'}/>
       </div>
     </div>
   );

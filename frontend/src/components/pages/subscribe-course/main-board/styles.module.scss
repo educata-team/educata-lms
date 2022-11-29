@@ -12,6 +12,19 @@
     justify-content: space-between;
     padding: 40px 0;
 
+    .logo{
+      display: flex;
+      flex-direction: column;
+
+      img{
+        max-height: 350px;
+        max-width: 300px;
+
+      }
+      p{
+        margin-left: 10px;
+      }
+    }
 
     .review {
       display: flex;
