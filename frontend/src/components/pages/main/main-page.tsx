@@ -8,7 +8,7 @@ import { CourseList } from '../../common/course-list/course-list';
 import { useCallback, useState } from '../../../hooks/hooks';
 
 export const MainPage:FC = () => {
-  const courses = [{ banner: 'tut bude link na baner', name: 'Nazva kursu', author: 'Author Kursu' }];
+  const courses = [{ banner: 'tut bude link na baner', name: 'Nazva kursu', author: 'Author Kursu' },{ banner: 'tut bude link na baner', name: 'Nazva kursu', author: 'Author Kursu' },{ banner: 'tut bude link na baner', name: 'Nazva kursu', author: 'Author Kursu' },{ banner: 'tut bude link na baner', name: 'Nazva kursu', author: 'Author Kursu' },{ banner: 'tut bude link na baner', name: 'Nazva kursu', author: 'Author Kursu' }];
   const [select, setSelect] = useState<string>('home');
   const selectCourse = useCallback((select: string):void => setSelect(select), [setSelect]);
 
