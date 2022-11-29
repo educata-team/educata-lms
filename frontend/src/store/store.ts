@@ -1,14 +1,16 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import {
-  // Import API services here
+  authApi,
+  userApi,
 } from 'services/services';
 import { rootReducer } from './root-reducer';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
 
 const extraArgument = {
-  // Insert imported API services here
+  authApi,
+  userApi,
 };
 
 const persistConfig = {
