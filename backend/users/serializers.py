@@ -34,6 +34,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
                 }
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        exclude = ['password', 'is_active', 'created_at', 'is_admin', 'updated_at', 'last_login']
+
+
 class MyTokenObtainSerizalier(TokenObtainPairSerializer):
 
     def validate(self, attrs):
