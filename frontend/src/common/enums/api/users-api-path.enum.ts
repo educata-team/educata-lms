@@ -3,4 +3,5 @@ export enum UsersApiPath {
   SIGN_IN = '/login',
   SIGN_OUT = '/sign-out',
   REFRESH_TOKENS = '/refresh-tokens',
+  USER = '/user',
 }
