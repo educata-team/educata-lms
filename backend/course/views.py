@@ -134,6 +134,9 @@ class AttendedCourseViewSet(ModelViewSet):
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def update(self, request, *args, **kwargs):
+        return Response({'detail': 'Method \PUT\ is not allowed'}, status=status.HTTP_403_FORBIDDEN)
+
     def destroy(self, request, *args, **kwargs):
         object_to_delete = self.get_object()
         try:
@@ -246,6 +249,7 @@ class AssignmentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()
+        self.check_object_permissions(request, assignment)
         if not assignment:
             return Response(data={'detail': 'Assignment does not exist'}, status=status.HTTP_404_NOT_FOUND)
 

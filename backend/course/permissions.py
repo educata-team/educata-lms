@@ -31,8 +31,6 @@ class CreateUpdateDeletePermission(permissions.BasePermission):
 
 class AttendedCoursePermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        if request.method in ('PUT', 'PATCH'):
-            return False
         if request.user.is_authenticated:
             return True
         return False
@@ -81,6 +79,7 @@ class ReviewPermission(permissions.BasePermission):
 
 class AssignmentPermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        print(request.user)
         if request.user.is_anonymous:
             raise PermissionDenied({'detail': 'You do not have permission'})
 
@@ -88,7 +87,7 @@ class AssignmentPermission(permissions.BasePermission):
             try:
                 unit = Unit.objects\
                     .select_related('course', 'course__owner')\
-                    .prefetch_related('course__evaluators', 'course__managers', 'course__editors')\
+                    .prefetch_related('course__managers', 'course__editors')\
                     .get(pk=view.kwargs.get('unit_pk'))
             except (Unit.DoesNotExist, KeyError, AttributeError):
                 return True
@@ -101,9 +100,10 @@ class AssignmentPermission(permissions.BasePermission):
             unit = Unit.objects.select_related('course').prefetch_related('course__attendedcourse_set').get(pk=view.kwargs.get('unit_pk'))
 
             # check if user from request has subscription on the unit`s course
-            if request.user not in [attended_course.user for attended_course in unit.course.attendedcourse_set.all()] \
-                    and request.user.role != 'moderator':
-                raise PermissionDenied({'detail': 'You do not have permission'})
+            if request.user in [attended_course.user for attended_course in unit.course.attendedcourse_set.all()] \
+                    and request.user.role == 'moderator' or request.user in unit.course.editors.all() or request.user in unit.course.managers.all() \
+                    or request.user == unit.course.owner:
+                return True
         except (AttributeError, KeyError, Unit.DoesNotExist):
             pass
 

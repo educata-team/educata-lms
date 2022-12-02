@@ -36,3 +36,14 @@ class FormInputQuestionModelViewSet(ModelViewSet):
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # TODO: decide in which way FormInputQuestion should be updated and set the url
+    def update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj:
+            return Response({'detail': 'Indicated form does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(data=request.data, instance=obj)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)

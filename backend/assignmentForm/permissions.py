@@ -6,6 +6,7 @@ from course.models import Assignment, AttendedCourse
 
 
 class FormInputPermission(BasePermission):
+    # TODO: add permission to 'moderator' role
     def has_permission(self, request, view):
         if request.user.is_anonymous:
             raise PermissionDenied({'detail': 'You do not have permission'})
