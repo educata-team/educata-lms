@@ -109,8 +109,8 @@ class AssignmentPermission(permissions.BasePermission):
 
         return True
 
+    # TODO: Check permission for PUT and DELETE requests
     def has_object_permission(self, request, view, obj):
-        print(request.user)
         if request.user.is_anonymous:
             raise PermissionDenied({'detail': 'You do not have permission'})
         elif request.user in obj.unit.course.editors.all() or request.user in obj.unit.course.managers.all() \
