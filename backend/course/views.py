@@ -113,11 +113,14 @@ class AttendedCourseViewSet(ModelViewSet):
     def get_object(self):
         try:
             return AttendedCourse.objects.get(course__pk=self.kwargs['pk'], user=self.request.user)
-        except AttendedCourse.DoesNotExist:
+        except (AttendedCourse.DoesNotExist, TypeError):
             return None
 
     def get_queryset(self):
-        return AttendedCourse.objects.filter(user=self.request.user)
+        try:
+            return AttendedCourse.objects.filter(user=self.request.user)
+        except TypeError:
+            return None
 
     def retrieve(self, request, *args, **kwargs):
         try:

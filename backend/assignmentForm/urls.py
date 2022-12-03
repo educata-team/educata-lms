@@ -4,5 +4,5 @@ from .views import *
 
 
 urlpatterns = [
-    path('', FormInputQuestionModelViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('', FormInputQuestionViewSet.as_view({'get': 'list', 'post': 'create'})),
 ]
