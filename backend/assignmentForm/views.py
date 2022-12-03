@@ -52,3 +52,25 @@ class FormInputQuestionViewSet(ModelViewSet):
             obj.delete()
             return Response({'detail': 'Successfully deleted'}, status=status.HTTP_200_OK)
         return Response({'detail': 'Indicated form input question does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class FormChoiceQuestionViewSet(ModelViewSet):
+    serializer_class = FormChoiceQuestionSerializer
+    permission_classes = []
+
+    def get_queryset(self):
+        self.check_permissions(self.request)
+        return FormChoiceQuestion.objects.select_related('assignment').filter(assignment__pk=self.request.data.get('assignment_pk'))
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(instance=queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        self.check_permissions(request)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
