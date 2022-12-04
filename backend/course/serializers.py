@@ -2,6 +2,7 @@ from rest_framework.serializers import ModelSerializer, StringRelatedField, Inte
 from rest_framework.exceptions import ValidationError
 
 from course.models import *
+from drf_extra_fields.fields import Base64ImageField
 
 
 class UserSerializer(ModelSerializer):
@@ -12,6 +13,9 @@ class UserSerializer(ModelSerializer):
 
 
 class CourseSerializer(ModelSerializer):
+    logo = Base64ImageField()
+    banner = Base64ImageField()
+    owner = IntegerField(source='user.id', required=False)
 
     class Meta:
         model = Course
@@ -23,21 +27,26 @@ class CourseSerializer(ModelSerializer):
             description=validated_data['description'],
             logo=validated_data['logo'],
             banner=validated_data['banner'],
-            owner=validated_data['owner'],
-            category=validated_data['category'],
+            owner=self.context.get('owner'),
+            category=validated_data['category']
         )
         course.evaluators.set(validated_data['evaluators'])
         course.editors.set(validated_data['editors'])
         course.managers.set(validated_data['managers'])
 
-        return {'title': course.title, 'description': course.description, 'banner': course.banner.url}
+        return course
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response['owner'] = instance.owner.pk
+        return response
 
 
 class CategorySerializer(ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('title', 'created_at', 'updated_at')
+        fields = ('id', 'title', 'created_at', 'updated_at')
 
 
 class UnitSerializer(ModelSerializer):

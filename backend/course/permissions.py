@@ -7,26 +7,39 @@ from .models import *
 
 class CreateUpdateDeletePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        if request.method == 'POST':
+            if request.user.is_authenticated and (request.user.role == 'moderator' or request.user.role == 'lecturer'):
+                return True
+            else:
+                raise PermissionDenied({'detail': 'You do not have permission'})
         return True
 
     def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+
+        if request.user.is_anonymous:
+            raise PermissionDenied({'detail': 'You do not have permission'})
+
+        if request.user.role == 'moderator' or request.user == obj.owner:
+            return True
 
         if request.method not in SAFE_METHODS:
 
             if request.user.is_anonymous:
-                return False
+                raise PermissionDenied({'detail': 'You do not have permission'})
 
-            if request.user == obj.owner or request.user.is_admin:
+            if request.user == obj.owner or request.user.role == 'moderator':
                 return True
 
             if request.method == 'PUT' or request.method == 'PATCH':
-                editors = obj.editors.set.all()
-                managers = obj.managers.set.all()
+                editors = obj.editors.all()
+                managers = obj.managers.all()
                 if request.user in editors or request.user in managers:
                     return True
             if not request.user.role == 'lecturer':
-                return False
-        return False
+                raise PermissionDenied({'detail': 'You do not have permission'})
+        raise PermissionDenied({'detail': 'You do not have permission'})
 
 
 class AttendedCoursePermission(permissions.BasePermission):
@@ -37,7 +50,8 @@ class AttendedCoursePermission(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         if request.method == 'DELETE':
-            if request.user == obj.user or request.user == obj.course.owner or request.user in obj.course.managers.all():
+            if request.user == obj.user or request.user == obj.course.owner or request.user in obj.course.managers.all()\
+                    or request.user.role == 'moderator':
                 return True
         return False
 
@@ -73,7 +87,7 @@ class ReviewPermission(permissions.BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
-        if request.user == obj.user or request.user.is_admin:
+        if request.user == obj.user or request.user.is_admin or request.user.role == 'moderator':
             return True
 
 
@@ -101,7 +115,7 @@ class AssignmentPermission(permissions.BasePermission):
 
             # check if user from request has subscription on the unit`s course
             if request.user in [attended_course.user for attended_course in unit.course.attendedcourse_set.all()] \
-                    and request.user.role == 'moderator' or request.user in unit.course.editors.all() or request.user in unit.course.managers.all() \
+                    or request.user.role == 'moderator' or request.user in unit.course.editors.all() or request.user in unit.course.managers.all() \
                     or request.user == unit.course.owner:
                 return True
         except (AttributeError, KeyError, Unit.DoesNotExist):
@@ -109,7 +123,6 @@ class AssignmentPermission(permissions.BasePermission):
 
         return True
 
-    # TODO: Check permission for PUT and DELETE requests
     def has_object_permission(self, request, view, obj):
         if request.user.is_anonymous:
             raise PermissionDenied({'detail': 'You do not have permission'})

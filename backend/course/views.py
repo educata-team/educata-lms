@@ -13,20 +13,47 @@ class CourseViewSet(ModelViewSet):
     serializer_class = CourseSerializer
     permission_classes = [CreateUpdateDeletePermission]
 
+    def get_object(self):
+        try:
+            course = Course.objects.get(pk=self.kwargs.get('pk'))
+            self.check_object_permissions(self.request, course)
+            return course
+        except Course.DoesNotExist:
+            return None
+
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        self.check_permissions(request)
+        serializer = self.get_serializer(data=request.data, context={'owner': request.user})
         if serializer.is_valid():
-            if self.request.user.is_anonymous:
-                return Response({'detail: You must be authorized'}, status.HTTP_401_UNAUTHORIZED)
-            if self.request.user.role == 'lecturer':
-                response = serializer.save()
-                return Response(data=response, status=status.HTTP_201_CREATED)
-            return Response({'detail': 'You do not have permission'}, status=status.HTTP_403_FORBIDDEN)
+            serializer.save()
+            response = serializer.data
+            del response['category']
+            return Response(data=response, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def retrieve(self, request, *args, **kwargs):
-        response = super(CourseViewSet, self).retrieve(request, *args, **kwargs)
-        return response
+        obj = self.get_object()
+        if obj:
+            serializer = self.get_serializer(obj)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'detail': 'Indicated course does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+    def update(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj:
+            return Response({'detail': 'Indicated course does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(data=request.data, instance=obj)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        obj = self.get_object()
+        if not obj:
+            return Response({'detail': 'Indicated course does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        obj.delete()
+        return Response({'detail': 'Successfully deleted'}, status=status.HTTP_200_OK)
 
 
 class CategoryViewsSet(ModelViewSet):
