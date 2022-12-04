@@ -16,7 +16,7 @@ export const FirstPage: FC<Props> = ({
 }) => {
   return (
     <Grid>
-      <Paper elevation={10} style={{ padding: 20, height: '60vh', width: 380, margin: '20px auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
+      <Paper elevation={10} style={{ padding: 20, height: '70vh', width: 380, margin: '20px auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
         <Grid style={{ textAlign: 'center' }}>
           <Typography variant="h4" gutterBottom>Sign Up</Typography>
         </Grid>
@@ -27,7 +27,7 @@ export const FirstPage: FC<Props> = ({
           placeholder="Repeat password"
           type="password"
           required
-          {...register('passwordRepeat', {
+          {...register('password_repeat', {
             validate: (val: string): string | undefined => {
               if (watch('password') !== val) {
                 return 'The passwords do not match';

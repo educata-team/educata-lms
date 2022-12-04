@@ -11,7 +11,11 @@ import { SecondPage } from './components/second-page';
 import styles from './styles.module.scss';
 
 export const Registration: FC = () => {
-  const { register, watch, handleSubmit } = useForm<FormValues>();
+  const { register, watch, handleSubmit } = useForm<FormValues>({
+    criteriaMode: 'all',
+    reValidateMode: 'onChange',
+    mode: 'onChange',
+  });
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -24,8 +28,8 @@ export const Registration: FC = () => {
     <div className={styles['form-wrapper']}>
       <form onSubmit={handleSubmit(async (data) => {
         await dispatch(authActions.signUp(data))
-        .unwrap()
-        .then(() => navigate(AppRoute.SIGN_IN));
+          .unwrap()
+          .then(() => navigate(AppRoute.SIGN_IN));
       })}>
         {page === 1 && <FirstPage onPageSwitch={handlePageSwitch} register={register} watch={watch} />}
         {page === 2 && <SecondPage onPageSwitch={handlePageSwitch} register={register} />}

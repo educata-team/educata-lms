@@ -1,6 +1,5 @@
-import { AppRoute, IconColor, IconName } from 'common/enums/enums';
+import { AppRoute } from 'common/enums/enums';
 import { FC } from 'common/types/types';
-import { Icon } from 'components/common/icon/icon';
 import { Route, Routes } from 'react-router-dom';
 import { ScrollToTop } from './scroll-to-top';
 

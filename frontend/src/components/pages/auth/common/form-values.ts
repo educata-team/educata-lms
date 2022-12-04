@@ -1,8 +1,9 @@
 export type FormValues = {
   email: string;
   password: string;
-  passwordRepeat: string;
+  password_repeat: string;
   username: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
+  role: string;
 };

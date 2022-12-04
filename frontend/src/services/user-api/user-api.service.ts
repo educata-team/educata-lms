@@ -18,7 +18,7 @@ class UserApi {
 
   public getUserById(userId: string): Promise<UserInfoResponseDto> {
     return this.#http.load({
-      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.USER}/${userId}`,
+      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.USER}/${userId}/`,
       options: {
         method: HttpMethod.GET,
       },
