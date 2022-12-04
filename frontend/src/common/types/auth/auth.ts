@@ -5,3 +5,4 @@ export { type SignInRequestDto } from './sign-in-request-dto.type';
 export { type SignInResponseDto } from './sign-in-response-dto.type';
 export { type SignUpRequestDto } from './sign-up-request-dto.type';
 export { type SignUpResponseDto } from './sign-up-response-dto.type';
+export { type UserInfoResponseDto } from './user-info-response-dto.type';

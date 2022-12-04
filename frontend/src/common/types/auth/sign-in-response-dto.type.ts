@@ -1,5 +1,5 @@
-import { TokenPair } from './token-pair.type';
-
 export type SignInResponseDto = {
-  tokens: TokenPair;
+  access: string;
+  refresh: string;
+  user_id: string;
 };

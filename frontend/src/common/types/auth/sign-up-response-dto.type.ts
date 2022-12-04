@@ -1,5 +1,7 @@
-import { TokenPair } from './token-pair.type';
-
 export type SignUpResponseDto = {
-  tokens: TokenPair;
+  id: string;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
 };

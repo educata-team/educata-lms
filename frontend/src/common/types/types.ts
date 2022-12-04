@@ -7,6 +7,7 @@ export {
   type SignInResponseDto,
   type SignUpRequestDto,
   type SignUpResponseDto,
+  type UserInfoResponseDto,
  } from './auth/auth';
 export {
   type AppDispatch,
