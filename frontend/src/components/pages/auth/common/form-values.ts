@@ -1,7 +1,8 @@
-export type SignUpRequestDto = {
+export type FormValues = {
   email: string;
-  username: string;
   password: string;
+  password_repeat: string;
+  username: string;
   first_name: string;
   last_name: string;
   role: string;

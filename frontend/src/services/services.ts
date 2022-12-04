@@ -4,6 +4,7 @@ import { Http } from './http/http.service';
 import { attachAuthTokenInterceptor } from './http/interceptors/attach-auth-token-interceptor';
 import { StorageService } from './storage/local-storage.service';
 import { TokensStorageService } from './storage/tokens-storage.service';
+import { UserApi } from './user-api/user-api.service';
 
 const storageService = new StorageService();
 const tokensStorageService = new TokensStorageService(storageService);
@@ -15,8 +16,14 @@ const authApi = new AuthApi({
   http,
 });
 
+const userApi = new UserApi({
+  apiPrefix: ENV.API_PATH,
+  http,
+});
+
 export {
   storageService,
   tokensStorageService,
   authApi,
+  userApi,
 };

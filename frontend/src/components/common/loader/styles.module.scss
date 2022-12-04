@@ -1,0 +1,42 @@
+.loader-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  position: relative;
+  display: inline-block;
+  width: var(--loader-size);
+  height: var(--loader-size);
+}
+
+.loader::after,
+.loader::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: var(--loader-size);
+  height: var(--loader-size);
+  border: 3px solid var(--loader-color);
+  border-radius: 50%;
+  animation: loader-animation 2s linear infinite;
+}
+
+.loader::after {
+  animation-delay: 1s;
+}
+
+@keyframes loader-animation {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
