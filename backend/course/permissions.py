@@ -93,7 +93,6 @@ class ReviewPermission(permissions.BasePermission):
 
 class AssignmentPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        print(request.user)
         if request.user.is_anonymous:
             raise PermissionDenied({'detail': 'You do not have permission'})
 
@@ -118,10 +117,11 @@ class AssignmentPermission(permissions.BasePermission):
                     or request.user.role == 'moderator' or request.user in unit.course.editors.all() or request.user in unit.course.managers.all() \
                     or request.user == unit.course.owner:
                 return True
+            else:
+                raise PermissionDenied({'detail': 'You do not have permission'})
         except (AttributeError, KeyError, Unit.DoesNotExist):
-            pass
-
-        return True
+            return True
+        raise PermissionDenied({'detail': 'You do not have permission'})
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_anonymous:

@@ -223,23 +223,25 @@ class AssignmentListCreateAPIView(ListCreateAPIView, DestroyAPIView):
 
     def get_queryset(self):
         try:
+            self.check_permissions(self.request)
+            Unit.objects.get(pk=self.kwargs.get('unit_pk'))
             return Assignment.objects.select_related('unit__course').filter(unit__pk=self.kwargs.get('unit_pk'))
-        except (KeyError, AttributeError):
-            return None
+        except (Unit.DoesNotExist, KeyError, AttributeError):
+            return 'no unit'
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        if queryset == 'no unit':
+            return Response({'detail': 'Invalid unit is indicated'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(instance=queryset, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
+        self.check_permissions(request)
         try:
             unit = Unit.objects.select_related('course', 'course__owner').get(pk=self.kwargs.get('unit_pk'))
         except Unit.DoesNotExist:
             return Response(data={'detail': 'Indicated unit does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
-        if request.user != unit.course.owner:
-            return Response({'detail': 'You do not have permission to create assignment for this course'}, status=status.HTTP_403_FORBIDDEN)
 
         serializer = self.get_serializer(data=request.data, context={'unit': unit})
         if serializer.is_valid():
