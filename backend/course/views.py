@@ -71,7 +71,10 @@ class UnitListCreateAPIView(ListCreateAPIView, DestroyAPIView):
     permission_classes = [UnitPermission]
 
     def get_queryset(self):
-        return Unit.objects.select_related('course').filter(course=Course.objects.get(pk=self.kwargs.get('course_pk')))
+        try:
+            return Unit.objects.select_related('course').filter(course=Course.objects.get(pk=self.kwargs.get('course_pk')))
+        except Course.DoesNotExist:
+            return None
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
