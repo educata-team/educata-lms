@@ -25,7 +25,7 @@ class AuthApi {
 
   public signUp(payload: SignUpRequestDto): Promise<SignUpResponseDto> {
     return this.#http.load({
-      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.SIGN_UP}`,
+      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.SIGN_UP}/`,
       options: {
         method: HttpMethod.POST,
         contentType: ContentType.JSON,
@@ -38,7 +38,7 @@ class AuthApi {
 
   public signIn(payload: SignInRequestDto): Promise<SignInResponseDto> {
     return this.#http.load({
-      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.SIGN_IN}`,
+      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.SIGN_IN}/`,
       options: {
         method: HttpMethod.POST,
         contentType: ContentType.JSON,
@@ -51,7 +51,7 @@ class AuthApi {
 
   public refreshTokens(payload: RefreshTokenRequestDto): Promise<RefreshTokenResponseDto> {
     return this.#http.load({
-      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.REFRESH_TOKENS}`,
+      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.REFRESH_TOKENS}/`,
       options: {
         method: HttpMethod.POST,
         contentType: ContentType.JSON,
@@ -64,7 +64,7 @@ class AuthApi {
 
   public signOut(): Promise<void> {
     return this.#http.load({
-      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.SIGN_OUT}`,
+      url: `${this.#apiPrefix}${ApiPath.USERS}${UsersApiPath.SIGN_OUT}/`,
       options: {
         method: HttpMethod.POST,
       },

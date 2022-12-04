@@ -7,7 +7,7 @@ from rest_framework.viewsets import ModelViewSet
 from jwt import decode
 
 from backend import settings
-from course.models import *
+
 from .permissions import *
 from .serializers import *
 
@@ -74,8 +74,10 @@ class AttendedCourseViewSet(ModelViewSet):
             return Response({'detail': 'You do not subscribed on requested course'}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
+        print(request.data.get('id'))
         serializer = self.get_serializer(data=request.data, context={'user': request.user})
         if serializer.is_valid():
+            print(serializer.data)
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -85,7 +87,7 @@ class AttendedCourseViewSet(ModelViewSet):
         try:
             object_to_delete.delete()
         except AttributeError:
-            return Response(data={'detail': 'Requesting course was not found'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={'detail': 'Requesting course was not found'}, status=status.HTTP_404_NOT_FOUND)
         return Response(data={'detail': 'Successfully deleted'}, status=status.HTTP_200_OK)
 
 
@@ -127,4 +129,9 @@ class ReviewViewSet(ModelViewSet):
             review_to_delete.delete()
             return Response({'detail': 'Successfully deleted'}, status=status.HTTP_200_OK)
         except (Course.DoesNotExist, ValidationError, Review.DoesNotExist):
-            return Response({'detail': 'Indicated course or review does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Indicated course or review does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class AssignmentModelViewSet(ModelViewSet):
+    serializer_class = AssignmentSerializer
+
