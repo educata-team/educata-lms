@@ -61,6 +61,6 @@ class Assignment(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, verbose_name='Юніт')
     description = models.TextField(verbose_name='Опис')
     file_required = models.BooleanField(verbose_name='Завдання, яке вимагає файлову відопвідь', default=False)
-    form_required = models.BooleanField(verbose_name='Завдання, яке вимагає відповідь письому або тестову', default=True)
+    form_required = models.BooleanField(verbose_name='Завдання, яке вимагає відповідь письмову або тестову', default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

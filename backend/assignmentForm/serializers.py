@@ -5,6 +5,7 @@ from .fields import Base64ImageField
 
 
 class FormInputQuestionSerializer(ModelSerializer):
+
     class Meta:
         model = FormInputQuestion
         fields = '__all__'

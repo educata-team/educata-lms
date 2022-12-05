@@ -23,6 +23,12 @@ class FormInputQuestionViewSet(ModelViewSet):
         except FormInputQuestion.DoesNotExist:
             return None
 
+    def get_assignment(self):
+        try:
+            return Assignment.objects.get(pk=self.request.data.get('assignment_id'))
+        except Assignment.DoesNotExist:
+            return None
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
@@ -30,6 +36,13 @@ class FormInputQuestionViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         self.check_permissions(request)
+        assignment = self.get_assignment()
+
+        if not assignment:
+            return Response({'Indicated assignment does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if not assignment.form_required:
+            return Response({'detail': 'This assignment cannot contains input questions'}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -39,7 +52,9 @@ class FormInputQuestionViewSet(ModelViewSet):
     def update(self, request, *args, **kwargs):
         obj = self.get_object()
         if not obj:
-            return Response({'detail': 'Indicated form does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Indicated input question does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if not obj.assignment.form_required:
+            return Response({'detail': 'This assignment cannot contains input questions'})
         serializer = self.get_serializer(data=request.data, instance=obj)
         if serializer.is_valid():
             serializer.save()
@@ -51,16 +66,22 @@ class FormInputQuestionViewSet(ModelViewSet):
         if obj:
             obj.delete()
             return Response({'detail': 'Successfully deleted'}, status=status.HTTP_200_OK)
-        return Response({'detail': 'Indicated form input question does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'Indicated input question does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class FormChoiceQuestionViewSet(ModelViewSet):
     serializer_class = FormChoiceQuestionSerializer
-    permission_classes = []
+    permission_classes = [FormInputPermission]
 
     def get_queryset(self):
         self.check_permissions(self.request)
         return FormChoiceQuestion.objects.select_related('assignment').filter(assignment__pk=self.request.data.get('assignment_pk'))
+
+    def get_assignment(self):
+        try:
+            return Assignment.objects.get(pk=self.request.data.get('assignment_id'))
+        except Assignment.DoesNotExist:
+            return None
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -69,6 +90,11 @@ class FormChoiceQuestionViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         self.check_permissions(request)
+        assignment = self.get_assignment()
+        if not assignment:
+            return Response({'Indicated assignment does not exist'}, status=status.HTTP_404_NOT_FOUND)
+        if not assignment.form_required:
+            return Response({'detail': 'This assignment cannot contains input questions'})
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()

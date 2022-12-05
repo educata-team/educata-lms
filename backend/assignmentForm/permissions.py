@@ -22,15 +22,22 @@ class FormInputPermission(BasePermission):
                 course__pk=assignment.unit.course.pk, user=request.user)
 
             if attended_courses or request.user == assignment.unit.course.owner or request.user in assignment.unit.course.managers.all() \
-                    or request.user in assignment.unit.course.editors.all():
+                    or request.user in assignment.unit.course.editors.all() or request.user.role == 'moderator':
                 return True
 
             if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
                 if request.user == assignment.unit.course.owner or request.user in assignment.unit.course.managers.all() \
-                        or request.user in assignment.unit.course.editors.all():
+                        or request.user in assignment.unit.course.editors.all() or request.user.role == 'moderator':
                     return True
                 else:
                     raise PermissionDenied({'detail': 'You do not have permission'})
         except:
             pass
         raise PermissionDenied({'detail': 'You do not have permission'})
+
+    def has_object_permission(self, request, view, obj):
+        if request.user == obj.unit.course.owner or request.user in obj.unit.course.managers.all() \
+                or request.user in obj.unit.course.editors.all() or request.user.role == 'moderator':
+            return True
+        else:
+            raise PermissionDenied({'detail': 'You do not have permission'})
