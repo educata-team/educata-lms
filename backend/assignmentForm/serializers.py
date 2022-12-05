@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer, IntegerField, CharField
 
 from assignmentForm.models import *
-from .fields import Base64ImageField
+from drf_extra_fields.fields import Base64FileField
 
 
 class FormInputQuestionSerializer(ModelSerializer):
@@ -15,4 +15,11 @@ class FormChoiceQuestionSerializer(ModelSerializer):
 
     class Meta:
         model = FormChoiceQuestion
+        fields = '__all__'
+
+
+class FormFileQuestionSerializer(ModelSerializer):
+
+    class Meta:
+        model = FormFileQuestion
         fields = '__all__'
