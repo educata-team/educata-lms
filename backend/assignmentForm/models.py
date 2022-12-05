@@ -27,7 +27,7 @@ class FormFileQuestion(models.Model):
 
 
 class FormChoiceOption(models.Model):
-    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
+    choice_question = models.ForeignKey(FormChoiceQuestion, on_delete=models.CASCADE)
     text = models.CharField(max_length=200, verbose_name='Відповідь')
     correct = models.BooleanField()
     created_at = models.DateTimeField(auto_now_add=True)
