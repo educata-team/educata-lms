@@ -9,8 +9,8 @@ from users.models import User
 class AssignmentAnswer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
-    grade = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)])
-    feedback = models.CharField(max_length=200)
+    grade = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(10)], blank=True, null=True)
+    feedback = models.CharField(max_length=200, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
