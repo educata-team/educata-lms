@@ -234,7 +234,18 @@ class AssignmentListCreateAPIView(ListCreateAPIView, DestroyAPIView):
         if queryset == 'no unit':
             return Response({'detail': 'Invalid unit is indicated'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(instance=queryset, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        response = serializer.data
+        try:
+            if request.user not in queryset[0].unit.course.editors.all() and request.user not in queryset[0].unit.course.evaluators.all() \
+                    and request.user not in queryset[0].unit.course.managers.all() and request.user.role != 'moderator' \
+                    and request.user != queryset[0].unit.course.owner:
+                for instance in response:
+                    for choice_question in instance.get('choice_questions'):
+                        for choice in choice_question.get('choices'):
+                            del choice['correct']
+            return Response(data=response, status=status.HTTP_200_OK)
+        except AttributeError:
+            return Response({}, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         self.check_permissions(request)
@@ -277,7 +288,15 @@ class AssignmentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
             return Response(data={'detail': 'Assignment does not exist'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(instance=assignment)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        response = serializer.data
+        if request.user not in assignment.unit.course.editors.all() and request.user not in assignment.unit.course.evaluators.all() \
+                and request.user not in assignment.unit.course.managers.all() and request.user.role != 'moderator' \
+                and request.user != assignment.unit.course.owner:
+            for instance in response:
+                for choice_question in instance.get('choice_questions'):
+                    for choice in choice_question.get('choices'):
+                        del choice['correct']
+        return Response(data=response, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         assignment = self.get_object()

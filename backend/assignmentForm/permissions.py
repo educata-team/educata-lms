@@ -41,3 +41,43 @@ class FormQuestionPermission(BasePermission):
             return True
         else:
             raise PermissionDenied({'detail': 'You do not have permission'})
+
+
+class OptionPermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            raise PermissionDenied({'detail': 'You do not have permission'})
+
+        if request.method in SAFE_METHODS:
+            try:
+                question = FormChoiceQuestion.objects \
+                    .select_related('assignment', 'assignment__unit__course') \
+                    .prefetch_related('assignment__unit__course__managers', 'assignment__unit__course__editors') \
+                    .get(pk=request.data.get('question'))
+                if request.user in question.assignment.unit.course.managers.all() or \
+                        request.user in question.assignment.unit.course.editors.all() \
+                        or request.user is question.assignment.unit.course.owner or request.user.role == 'manager':
+                    return True
+                raise PermissionDenied({'detail': 'You do not have permission'})
+            except FormChoiceQuestion.DoesNotExist:
+                return True
+
+        if request.method == 'POST':
+            if not len(set([instance.get('question') for instance in request.data])) > 1 and request.data:
+                try:
+                    question = FormChoiceQuestion.objects\
+                        .select_related('assignment', 'assignment__unit__course')\
+                        .prefetch_related('assignment__unit__course__managers', 'assignment__unit__course__editors') \
+                        .get(pk=request.data[0].get('question'))
+                except FormChoiceQuestion.DoesNotExist:
+                    return True
+
+                if not question.is_multiple_answer and [instance if instance.get('correct') else None for instance
+                                                        in request.data]:
+                    return PermissionDenied({'detail': 'In this question there could be only one correct answer'})
+
+                if request.user in question.assignment.unit.course.editors.all() or request.user in question.assignment.unit.course.managers.all() \
+                        or request.user is question.assignment.unit.course.owner or request.user.role == 'moderator':
+                    return True
+                raise PermissionDenied({'detail': 'You do not have permission'})
+        return True

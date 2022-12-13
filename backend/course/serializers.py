@@ -2,6 +2,9 @@ from rest_framework.serializers import ModelSerializer, StringRelatedField, Inte
 from rest_framework.exceptions import ValidationError
 
 from course.models import *
+from assignmentForm.serializers import FormInputQuestionSerializer, FormChoiceQuestionSerializer, FormFileQuestionSerializer
+from assignmentForm.models import FormChoiceQuestion, FormFileQuestion, FormInputQuestion
+
 from drf_extra_fields.fields import Base64ImageField
 
 
@@ -135,3 +138,19 @@ class AssignmentSerializer(ModelSerializer):
             form_required=validated_data.get('form_required')
         )
         return assignment
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['input_questions'] = FormInputQuestionSerializer(FormInputQuestion.objects
+                                                              .select_related('assignment')
+                                                              .filter(assignment__id=data.get('id')),
+                                                              many=True).data
+        data['choice_questions'] = FormChoiceQuestionSerializer(FormChoiceQuestion.objects
+                                                                .select_related('assignment')
+                                                                .filter(assignment__id=data.get('id')),
+                                                                many=True).data
+        data['file_questions'] = FormFileQuestionSerializer(FormFileQuestion.objects
+                                                            .select_related('assignment')
+                                                            .filter(assignment__id=data.get('id')),
+                                                            many=True).data
+        return data

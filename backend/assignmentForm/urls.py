@@ -10,4 +10,5 @@ urlpatterns = [
     path('choice-question/<int:choice_question_pk>/', FormChoiceQuestionViewSet.as_view({'put': 'update', 'delete': 'destroy'})),
     path('file-question/', FormFileQuestionViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('file-question/<int:file_question_pk>/', FormFileQuestionViewSet.as_view({'put': 'update', 'delete': 'destroy'})),
+    path('choice-question/choice/', FormChoiceOptionViewSet.as_view({'get': 'list', 'post': 'create', 'put': 'update'})),
 ]

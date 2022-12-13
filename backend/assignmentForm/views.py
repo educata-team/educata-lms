@@ -13,7 +13,7 @@ class FormInputQuestionViewSet(ModelViewSet):
 
     def get_queryset(self):
         self.check_permissions(self.request)
-        return FormInputQuestion.objects.filter(assignment__pk=self.request.data.get('assignment_id'))
+        return FormInputQuestion.objects.filter(assignment__pk=self.request.data.get('assignment'))
 
     def get_object(self):
         try:
@@ -70,13 +70,12 @@ class FormInputQuestionViewSet(ModelViewSet):
 
 
 class FormChoiceQuestionViewSet(ModelViewSet):
-    # TODO: to return data of 'retrieve' and 'update' methods add their answer choices
     serializer_class = FormChoiceQuestionSerializer
     permission_classes = [FormQuestionPermission]
 
     def get_queryset(self):
         self.check_permissions(self.request)
-        return FormChoiceQuestion.objects.select_related('assignment').filter(assignment__pk=self.request.data.get('assignment_id'))
+        return FormChoiceQuestion.objects.select_related('assignment').filter(assignment__pk=self.request.data.get('assignment'))
 
     def get_object(self):
         try:
@@ -95,7 +94,7 @@ class FormChoiceQuestionViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        if not request.data.get('assignment_id'):
+        if not request.data.get('assignment'):
             return Response({'detail': 'There is no indicated assignment'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(instance=queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -141,7 +140,7 @@ class FormFileQuestionViewSet(ModelViewSet):
 
     def get_queryset(self):
         self.check_permissions(self.request)
-        return FormFileQuestion.objects.select_related('assignment').filter(assignment__pk=self.kwargs.get('assignment_id'))
+        return FormFileQuestion.objects.select_related('assignment').filter(assignment__pk=self.request.data.get('assignment'))
 
     def get_object(self):
         try:
@@ -160,7 +159,7 @@ class FormFileQuestionViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        if not request.data.get('assignment_id'):
+        if not request.data.get('assignment'):
             return Response({'detail': 'There is no indicated assignment'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(instance=queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -198,3 +197,54 @@ class FormFileQuestionViewSet(ModelViewSet):
             obj.delete()
             return Response({'detail': 'Successfully deleted'}, status=status.HTTP_200_OK)
         return Response({'detail': 'Indicated file question does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class FormChoiceOptionViewSet(ModelViewSet):
+    serializer_class = FormChoiceOptionSerializer
+    permission_classes = [OptionPermission]
+
+    def get_queryset(self):
+        self.check_permissions(self.request)
+        try:
+            question = FormChoiceQuestion.objects.get(pk=self.request.data.get('question'))
+        except FormChoiceQuestion.DoesNotExist:
+            return [], False
+        return FormChoiceOption.objects.select_related('question')\
+            .filter(question__pk=self.request.data.get('question')), True
+
+    def list(self, request, *args, **kwargs):
+        queryset, is_valid = self.get_queryset()
+        if not is_valid:
+            return Response({'detail': 'Indicated question does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        if len(set([instance.get('question') for instance in request.data])) > 1:
+            return Response({'detail': 'All choices must be bounded to one question'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if not request.data:
+            return Response({'detail': 'There is no choices'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=request.data, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        self.check_permissions(request)
+        response = []
+        for record in request.data:
+            try:
+                choice = FormChoiceOption.objects.get(pk=record.get('id'))
+                record_serializer = self.get_serializer(data=record, instance=choice)
+                if record_serializer.is_valid():
+                    record_serializer.save()
+                    response.append(record_serializer.data)
+                    continue
+                response.append(record_serializer.errors)
+            except FormChoiceOption.DoesNotExist:
+                response.append({'id': record.get('id'), 'detail': 'Indicated choice doest not exist'})
+        return Response(data=response, status=status.HTTP_200_OK)
