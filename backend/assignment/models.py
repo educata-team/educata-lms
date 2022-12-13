@@ -34,5 +34,6 @@ class AssignmentFileAnswer(models.Model):
 class AssignmentInputAnswer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     question = models.ForeignKey(FormInputQuestion, on_delete=models.CASCADE)
+    answer = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

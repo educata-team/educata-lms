@@ -25,7 +25,7 @@ class FormInputQuestionViewSet(ModelViewSet):
 
     def get_assignment(self):
         try:
-            return Assignment.objects.get(pk=self.request.data.get('assignment_id'))
+            return Assignment.objects.get(pk=self.request.data.get('assignment'))
         except Assignment.DoesNotExist:
             return None
 
@@ -76,11 +76,11 @@ class FormChoiceQuestionViewSet(ModelViewSet):
 
     def get_queryset(self):
         self.check_permissions(self.request)
-        return FormChoiceQuestion.objects.select_related('assignment').filter(assignment__pk=self.request.data.get('assignment_pk'))
+        return FormChoiceQuestion.objects.select_related('assignment').filter(assignment__pk=self.request.data.get('assignment_id'))
 
     def get_object(self):
         try:
-            choice_question = FormChoiceQuestion.objects.get(pk=self.request.data.get('choice_question_pk'))
+            choice_question = FormChoiceQuestion.objects.get(pk=self.kwargs.get('choice_question_pk'))
             self.check_object_permissions(self.request, choice_question)
             return choice_question
         except FormChoiceQuestion.DoesNotExist:
@@ -121,7 +121,7 @@ class FormChoiceQuestionViewSet(ModelViewSet):
         if not assignment.form_required:
             return Response({'detail': 'This assignment cannot contains choice questions'})
 
-        serializer = self.get_serializer(request.data, instance=obj)
+        serializer = self.get_serializer(data=request.data, instance=obj)
         if serializer.is_valid():
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_200_OK)
@@ -141,7 +141,15 @@ class FormFileQuestionViewSet(ModelViewSet):
 
     def get_queryset(self):
         self.check_permissions(self.request)
-        return FormFileQuestion.objects.select_related('assignment').filter(assignment__pk=self.request.data.get('assignment_pk'))
+        return FormFileQuestion.objects.select_related('assignment').filter(assignment__pk=self.kwargs.get('assignment_id'))
+
+    def get_object(self):
+        try:
+            file_question = FormFileQuestion.objects.get(pk=self.request.data.get('file_question_pk'))
+            self.check_object_permissions(self.request, file_question)
+            return file_question
+        except FormFileQuestion.DoesNotExist:
+            return None
 
     def get_assignment(self):
         try:
@@ -178,7 +186,7 @@ class FormFileQuestionViewSet(ModelViewSet):
         if not assignment.form_required:
             return Response({'detail': 'This assignment cannot contains file questions'})
 
-        serializer = self.get_serializer(request.data, instance=obj)
+        serializer = self.get_serializer(data=request.data, instance=obj)
         if serializer.is_valid():
             serializer.save()
             return Response(data=serializer.data, status=status.HTTP_200_OK)

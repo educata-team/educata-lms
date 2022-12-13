@@ -1,7 +1,6 @@
-from rest_framework.serializers import ModelSerializer, IntegerField, CharField
+from rest_framework.serializers import ModelSerializer
 
 from assignmentForm.models import *
-from drf_extra_fields.fields import Base64FileField
 
 
 class FormInputQuestionSerializer(ModelSerializer):

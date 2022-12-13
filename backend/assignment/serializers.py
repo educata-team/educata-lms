@@ -1,5 +1,6 @@
-from django.forms import IntegerField, CharField
+from rest_framework.fields import IntegerField, CharField
 from rest_framework.serializers import ModelSerializer
+from drf_extra_fields.fields import Base64FileField
 
 from .models import *
 
@@ -20,8 +21,25 @@ class AssignmentAnswerSerializer(ModelSerializer):
 
 
 class AssignmentChoiceAnswerSerializer(ModelSerializer):
-    user = IntegerField(source='user.id', required=False)
+    user = IntegerField(source='user.pk', required=False)
 
     class Meta:
         model = AssignmentChoiceAnswer
+        fields = '__all__'
+
+
+class AssignmentInputAnswerSerializer(ModelSerializer):
+    user = IntegerField(source='user.id', required=False)
+
+    class Meta:
+        model = AssignmentInputAnswer
+        fields = '__all__'
+
+
+class AssigmentFileAnswerSerializer(ModelSerializer):
+    user = IntegerField(source='user.id', required=False)
+    file = Base64FileField()
+
+    class Meta:
+        model = AssignmentFileAnswer
         fields = '__all__'
