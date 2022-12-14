@@ -248,3 +248,15 @@ class FormChoiceOptionViewSet(ModelViewSet):
             except FormChoiceOption.DoesNotExist:
                 response.append({'id': record.get('id'), 'detail': 'Indicated choice doest not exist'})
         return Response(data=response, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        self.check_permissions(request)
+        response = []
+        for record in request.data:
+            try:
+                choice = FormChoiceOption.objects.get(pk=record.get('id'))
+                choice.delete()
+                response.append({'id': record.get('id'), 'detail': 'Successfully deleted'})
+            except FormChoiceOption.DoesNotExist:
+                response.append({'id': record.get('id'), 'detail': 'Indicated chocie does not exist'})
+        return Response(response, status=status.HTTP_200_OK)

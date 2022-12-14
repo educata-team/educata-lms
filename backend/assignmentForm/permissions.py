@@ -56,13 +56,13 @@ class OptionPermission(BasePermission):
                     .get(pk=request.data.get('question'))
                 if request.user in question.assignment.unit.course.managers.all() or \
                         request.user in question.assignment.unit.course.editors.all() \
-                        or request.user is question.assignment.unit.course.owner or request.user.role == 'manager':
+                        or request.user == question.assignment.unit.course.owner or request.user.role == 'manager':
                     return True
                 raise PermissionDenied({'detail': 'You do not have permission'})
             except FormChoiceQuestion.DoesNotExist:
                 return True
 
-        if request.method == 'POST':
+        if request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
             if not len(set([instance.get('question') for instance in request.data])) > 1 and request.data:
                 try:
                     question = FormChoiceQuestion.objects\
@@ -72,12 +72,13 @@ class OptionPermission(BasePermission):
                 except FormChoiceQuestion.DoesNotExist:
                     return True
 
-                if not question.is_multiple_answer and [instance if instance.get('correct') else None for instance
-                                                        in request.data]:
-                    return PermissionDenied({'detail': 'In this question there could be only one correct answer'})
+                if request.method == 'POST':
+                    if not question.is_multiple_answer and [instance if instance.get('correct') else None for instance
+                                                            in request.data]:
+                        return PermissionDenied({'detail': 'In this question there could be only one correct answer'})
 
                 if request.user in question.assignment.unit.course.editors.all() or request.user in question.assignment.unit.course.managers.all() \
-                        or request.user is question.assignment.unit.course.owner or request.user.role == 'moderator':
+                        or request.user == question.assignment.unit.course.owner or request.user.role == 'moderator':
                     return True
                 raise PermissionDenied({'detail': 'You do not have permission'})
         return True
