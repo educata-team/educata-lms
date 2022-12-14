@@ -286,16 +286,15 @@ class AssignmentRetrieveUpdateDestroyAPIView(RetrieveUpdateDestroyAPIView):
         assignment = self.get_object()
         if not assignment:
             return Response(data={'detail': 'Assignment does not exist'}, status=status.HTTP_404_NOT_FOUND)
-
         serializer = self.get_serializer(instance=assignment)
         response = serializer.data
         if request.user not in assignment.unit.course.editors.all() and request.user not in assignment.unit.course.evaluators.all() \
                 and request.user not in assignment.unit.course.managers.all() and request.user.role != 'moderator' \
                 and request.user != assignment.unit.course.owner:
-            for instance in response:
-                for choice_question in instance.get('choice_questions'):
-                    for choice in choice_question.get('choices'):
-                        del choice['correct']
+
+            for choice_question in response.get('choice_questions'):
+                for choice in choice_question.get('choices'):
+                    del choice['correct']
         return Response(data=response, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):

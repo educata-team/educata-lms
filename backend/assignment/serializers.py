@@ -2,6 +2,7 @@ from rest_framework.fields import IntegerField, CharField
 from rest_framework.serializers import ModelSerializer
 from drf_extra_fields.fields import Base64FileField
 
+from course.serializers import AssignmentSerializer
 from .models import *
 
 
@@ -32,6 +33,7 @@ class AssignmentAnswerSerializer(ModelSerializer):
         response['user'] = instance.user.id
         response['grade'] = instance.grade
         response['feedback'] = instance.feedback
+        response['assignment'] = AssignmentSerializer(instance=Assignment.objects.get(pk=response.get('assignment'))).data
         return response
 
 

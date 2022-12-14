@@ -7,6 +7,110 @@ from assignmentForm.serializers import *
 from assignmentForm.permissions import *
 
 
+class FormQuestionsViewSet(ModelViewSet):
+    serializer_class = FormInputQuestionSerializer
+    permission_classes = [QuestionPermission]
+
+    def create(self, request, *args, **kwargs):
+        self.check_permissions(request)
+
+        input_questions = [question for question in request.data if question.get('type') == 'input']
+        choice_questions = [question for question in request.data if question.get('type') == 'choice']
+        file_questions = [question for question in request.data if question.get('type') == 'file']
+
+        for answer in input_questions:
+            answer['user'] = request.user.id
+
+        for answer in file_questions:
+            answer['user'] = request.user.id
+
+        for answer in choice_questions:
+            answer['user'] = request.user.id
+
+            # initializing bool for further saving
+            input_serializer_valid = True
+            file_serializer_valid = True
+            choice_serializer_valid = True
+
+            # initializing serializers only if such type of answers is present in request.data
+            if input_questions:
+                input_serializer = self.get_serializer(data=input_questions, many=True)
+                input_serializer_valid = input_serializer.is_valid()
+            if file_questions:
+                file_serializer = FormFileQuestionSerializer(data=file_questions, many=True)
+                file_serializer_valid = file_serializer.is_valid()
+            if choice_questions:
+                choice_serializer = FormChoiceQuestionSerializer(data=choice_questions, many=True)
+                choice_serializer_valid = choice_serializer.is_valid()
+
+            if input_serializer_valid and file_serializer_valid and choice_serializer_valid:
+                response = []
+                if input_questions:
+                    input_serializer.save()
+                    response.extend(input_serializer.data)
+                if file_questions:
+                    file_serializer.save()
+                    response.extend(file_serializer.data)
+                if choice_questions:
+                    choice_serializer.save()
+                    response.extend(choice_serializer.data)
+                return Response(data=response, status=status.HTTP_201_CREATED)
+
+            return Response({'detail': 'Something went wrong'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        response = {'input': [], 'file': [], 'choice': []}
+        input_questions = []
+        file_questions = []
+        choice_questions = []
+
+        for record in request.data:
+            if record.get('type') == 'input':
+                input_questions.append(record)
+            if record.get('type') == 'file':
+                file_questions.append(record)
+            if record.get('type') == 'choice':
+                choice_questions.append(record)
+
+        for question in input_questions:
+            try:
+                choice = FormInputQuestion.objects.get(pk=question.get('id'))
+                record_serializer = self.get_serializer(data=question, instance=choice)
+                if record_serializer.is_valid():
+                    record_serializer.save()
+                    response['input'].append(record_serializer.data)
+                    continue
+                response['input'].append(record_serializer.errors)
+            except FormChoiceOption.DoesNotExist:
+                response['input'].append({'id': question.get('id'), 'detail': 'Indicated choice doest not exist'})
+
+        for question in file_questions:
+            try:
+                choice = FormFileQuestion.objects.get(pk=question.get('id'))
+                record_serializer = FormFileQuestionSerializer(data=question, instance=choice)
+                if record_serializer.is_valid():
+                    record_serializer.save()
+                    response['file'].append(record_serializer.data)
+                    continue
+                response['file'].append(record_serializer.errors)
+            except FormChoiceOption.DoesNotExist:
+                response['file'].append({'id': question.get('id'), 'detail': 'Indicated choice doest not exist'})
+
+        for question in choice_questions:
+            try:
+                choice = FormChoiceQuestion.objects.get(pk=question.get('id'))
+                record_serializer = FormChoiceQuestionSerializer(data=question, instance=choice)
+                if record_serializer.is_valid():
+                    record_serializer.save()
+                    response['choice'].append(record_serializer.data)
+                    continue
+                response['choice'].append(record_serializer.errors)
+            except FormChoiceOption.DoesNotExist:
+                response['choice'].append({'id': question.get('id'), 'detail': 'Indicated choice doest not exist'})
+
+        return Response(data=response, status=status.HTTP_200_OK)
+
+
 class FormInputQuestionViewSet(ModelViewSet):
     serializer_class = FormInputQuestionSerializer
     permission_classes = [FormQuestionPermission]
@@ -17,7 +121,7 @@ class FormInputQuestionViewSet(ModelViewSet):
 
     def get_object(self):
         try:
-            form_input_question = FormInputQuestion.objects.select_related('assignment').get(pk=self.kwargs.get('form_input_question_pk'))
+            form_input_question = FormInputQuestion.objects.select_related('assignment').get(pk=self.request.data.get('form_input_question_pk'))
             self.check_object_permissions(self.request, form_input_question)
             return form_input_question
         except FormInputQuestion.DoesNotExist:

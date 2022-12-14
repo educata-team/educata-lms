@@ -41,7 +41,6 @@ class AnswerAssignmentPermission(BasePermission):
             raise PermissionDenied({'detail': 'You do not have permission'})
 
         if request.method in SAFE_METHODS:
-            print(AttendedCourse.objects.filter(user=request.user, course=obj.assignment.unit.course))
             if request.user in obj.assignment.unit.course.editors.all() or request.user in obj.assignment.unit.course.managers.all() \
                     or request.user in obj.assignment.unit.course.evaluators.all() or request.user == obj.assignment.unit.course.owner \
                     or request.user.role == 'moderator' \
@@ -58,19 +57,16 @@ class AnswerAssignmentPermission(BasePermission):
 
 class AnswerPermission(BasePermission):
     def has_permission(self, request, view):
-        print(request.user)
         if request.user.is_anonymous:
             raise PermissionDenied({'detail': 'You do not have permission'})
 
         if request.method == 'POST':
 
             # get from request all questions id
-            input_questions_id = [instance.get('question') if instance.get('type') == 'input' else None for instance
-                                  in request.data]
-            file_question_id = [instance.get('question') if instance.get('type') == 'file' else None for instance in
-                                request.data]
-            choice_question_id = [instance.get('question') if instance.get('type') == 'choice' else None for
-                                  instance in request.data]
+            input_questions_id = [instance.get('question') for instance
+                                  in request.data if instance.get('type') == 'input' if instance.get('type') == 'input']
+            file_question_id = [instance.get('question') for instance in request.data if instance.get('type') == 'file']
+            choice_question_id = [instance.get('question') for instance in request.data if instance.get('type') == 'choice']
 
             # get questions from database
             input_questions = FormInputQuestion.objects \
@@ -94,9 +90,7 @@ class AnswerPermission(BasePermission):
             if len(set(assignment_id)) > 1:
                 raise PermissionDenied({'detail': 'All answers must be bounded to one assignment'})
             assignment = set(assignment_id).pop()
-            # if request.user not in [user.user for user in assignment.unit.course.attendedcourse_set.all()] or \
-            #         request.user.role != 'moderator':
-            print(AttendedCourse.objects.filter(user=request.user, course=assignment.unit.course))
+
             if not AttendedCourse.objects.filter(user=request.user, course=assignment.unit.course) and \
                     request.user.role != 'moderator':
                 raise PermissionDenied({'detail': 'You do not have permission'})

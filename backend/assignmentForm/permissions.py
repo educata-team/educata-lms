@@ -5,6 +5,31 @@ from .models import *
 from course.models import Assignment, AttendedCourse
 
 
+class QuestionPermission(BasePermission):
+    def has_permission(self, request, view):
+        if request.user.is_anonymous:
+            raise PermissionDenied({'detail': 'You do not have permission'})
+
+        if request.method == 'POST':
+
+            # get from request all questions id
+            assignment_id = [instance.get('assignment') for instance
+                                  in request.data if instance.get('type') == 'input' if instance.get('type') == 'input']
+            assignment_id.extend([instance.get('assignment') for instance in request.data if instance.get('type') == 'file'])
+            assignment_id.extend([instance.get('assignment') for instance in request.data if instance.get('type') == 'choice'])
+
+            if len(set(assignment_id)) > 1:
+                raise PermissionDenied({'detail': 'All answers must be bounded to one assignment'})
+            assignment = set(assignment_id).pop()
+
+            assignment = Assignment.objects.get(pk=assignment)
+
+            if request.user not in assignment.unit.course.editors.all() and request.user not in assignment.unit.course.managers.all() \
+                    and request.user == assignment.unit.course.owner and request.user.role == 'moderator':
+                raise PermissionDenied({'detail': 'You do not have permission'})
+        return True
+
+
 class FormQuestionPermission(BasePermission):
     def has_permission(self, request, view):
         if request.user.is_anonymous:

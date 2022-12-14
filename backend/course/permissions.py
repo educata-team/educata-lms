@@ -126,6 +126,11 @@ class AssignmentPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_anonymous:
             raise PermissionDenied({'detail': 'You do not have permission'})
+        if request.method in SAFE_METHODS:
+            if request.user in obj.unit.course.editors.all() or request.user in obj.unit.course.managers.all() \
+                    or request.user == obj.unit.course.owner or request.user.role == 'moderator' \
+                    or AttendedCourse.objects.filter(user=request.user, course=obj.unit.course):
+                return True
         elif request.user in obj.unit.course.editors.all() or request.user in obj.unit.course.managers.all() \
                 or request.user == obj.unit.course.owner or request.user.role == 'moderator':
             return True

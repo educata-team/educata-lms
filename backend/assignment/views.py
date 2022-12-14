@@ -38,7 +38,7 @@ class AssignmentAnswerCreateUpdateView(ModelViewSet):
 
         obj = self.get_object()
         if not obj:
-            return Response({'detail': 'Indicated assignment answer does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'You have not passed this assignment yet'}, status=status.HTTP_404_NOT_FOUND)
         serializer = self.get_serializer(obj)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
