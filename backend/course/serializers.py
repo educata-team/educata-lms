@@ -1,7 +1,11 @@
-from rest_framework.serializers import ModelSerializer, StringRelatedField, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, StringRelatedField, IntegerField, RelatedField
 from rest_framework.exceptions import ValidationError
 
 from course.models import *
+from assignmentForm.serializers import FormInputQuestionSerializer, FormChoiceQuestionSerializer, FormFileQuestionSerializer
+from assignmentForm.models import FormChoiceQuestion, FormFileQuestion, FormInputQuestion
+
+from drf_extra_fields.fields import Base64ImageField
 
 
 class UserSerializer(ModelSerializer):
@@ -12,31 +16,9 @@ class UserSerializer(ModelSerializer):
 
 
 class CourseSerializer(ModelSerializer):
-    units = SerializerMethodField(method_name='get_units')
-    evaluators = SerializerMethodField(method_name='get_evaluators')
-    owner = SerializerMethodField()
-    managers = SerializerMethodField()
-    editors = SerializerMethodField()
-
-    def get_owner(self, obj):
-        return UserSerializer(obj.owner).data
-
-
-    def get_units(self, obj):
-        units = obj.unit_set.all()
-        return UnitSerializer(units, many=True).data
-
-    def get_evaluators(self, obj):
-        evaluators = obj.evaluators.all()
-        return UserSerializer(evaluators, many=True).data
-
-    def get_managers(self, obj):
-        managers = obj.managers.all()
-        return UserSerializer(managers, many=True).data
-
-    def get_editors(self, obj):
-        editors = obj.editors.all()
-        return UserSerializer(editors, many=True).data
+    logo = Base64ImageField()
+    banner = Base64ImageField()
+    owner = IntegerField(source='user.id', required=False)
 
     class Meta:
         model = Course
@@ -48,32 +30,44 @@ class CourseSerializer(ModelSerializer):
             description=validated_data['description'],
             logo=validated_data['logo'],
             banner=validated_data['banner'],
-            owner=validated_data['owner'],
-            category=validated_data['category'],
+            owner=self.context.get('owner'),
+            category=validated_data['category']
         )
         course.evaluators.set(validated_data['evaluators'])
         course.editors.set(validated_data['editors'])
         course.managers.set(validated_data['managers'])
 
-        return {'title': course.title, 'description': course.description, 'banner': course.banner.url}
+        return course
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        response['owner'] = instance.owner.pk
+        return response
 
 
 class CategorySerializer(ModelSerializer):
-    course_set = SerializerMethodField()
-
-    def get_course_set(self, obj):
-        courses = obj.course_set.all()
-        return CourseSerializer(courses, many=True).data
 
     class Meta:
         model = Category
-        fields = ('course_set', 'title', 'created_at', 'updated_at')
+        fields = ('id', 'title', 'created_at', 'updated_at')
 
 
 class UnitSerializer(ModelSerializer):
     class Meta:
         model = Unit
         fields = '__all__'
+
+    def create(self, validated_data):
+        unit = Unit.objects.create(
+            title=validated_data.get('title'),
+            course=self.context.get('course')
+        )
+        return unit
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.save()
+        return instance
 
 
 class LectureSerializer(ModelSerializer):
@@ -83,16 +77,7 @@ class LectureSerializer(ModelSerializer):
 
 
 class AttendedCourseSerializer(ModelSerializer):
-    user = SerializerMethodField(required=False)
-    course = SerializerMethodField()
-
-    def get_course(self, obj):
-        return CourseSerializer(obj.course).data
-
-    def get_user(self, obj):
-        print(f"obj in gt user {obj}")
-        print(self.context)
-        return UserSerializer(obj.user).data
+    user = StringRelatedField(required=False)
 
     class Meta:
         model = AttendedCourse
@@ -112,7 +97,7 @@ class AttendedCourseSerializer(ModelSerializer):
 
 
 class ReviewSerializer(ModelSerializer):
-    user = SerializerMethodField(required=False)
+    user = StringRelatedField(required=False)
 
     class Meta:
         model = Review
@@ -138,7 +123,34 @@ class ReviewSerializer(ModelSerializer):
 
 
 class AssignmentSerializer(ModelSerializer):
+    unit = IntegerField(source='unit.id', required=False)
 
     class Meta:
         model = Assignment
         fields = '__all__'
+
+    def create(self, validated_data):
+        assignment = Assignment.objects.create(
+            title=validated_data.get('title'),
+            unit=self.context.get('unit'),
+            description=validated_data.get('description'),
+            file_required=validated_data.get('file_required'),
+            form_required=validated_data.get('form_required')
+        )
+        return assignment
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['input_questions'] = FormInputQuestionSerializer(FormInputQuestion.objects
+                                                              .select_related('assignment')
+                                                              .filter(assignment__id=data.get('id')),
+                                                              many=True).data
+        data['choice_questions'] = FormChoiceQuestionSerializer(FormChoiceQuestion.objects
+                                                                .select_related('assignment')
+                                                                .filter(assignment__id=data.get('id')),
+                                                                many=True).data
+        data['file_questions'] = FormFileQuestionSerializer(FormFileQuestion.objects
+                                                            .select_related('assignment')
+                                                            .filter(assignment__id=data.get('id')),
+                                                            many=True).data
+        return data

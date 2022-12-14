@@ -10,6 +10,8 @@ from .yasg import urlpatterns as yasg_doc
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v1/assignment/', include('assignmentForm.urls')),
+    path('api/v1/answer/', include('assignment.urls')),
     path('api/v1/courses/', include('course.urls')),
     path('api/v1/users/', include('users.urls')),
 ]
