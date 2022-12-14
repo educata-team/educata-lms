@@ -6,12 +6,14 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer
 from rest_framework_simplejwt.state import token_backend
+from drf_extra_fields.fields import Base64ImageField
 
 from .models import *
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(min_length=6, write_only=True)
+    avatar = Base64ImageField()
 
     class Meta:
         model = User
@@ -37,6 +39,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField()
+
     class Meta:
         model = User
         exclude = ['password', 'is_active', 'created_at', 'is_admin', 'updated_at', 'last_login']
